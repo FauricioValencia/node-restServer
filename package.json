@@ -15,6 +15,7 @@
     "body-parser": "^1.18.3",
     "express": "^4.16.4",
     "install": "^0.12.2",
+    "jsonwebtoken": "^8.4.0",
     "mongoose": "^5.3.15",
     "mongoose-unique-validator": "^2.0.2",
     "mongoose-validator": "^2.1.0",

@@ -1,10 +1,14 @@
 var express = require('express');
 const bcrypt = require('bcrypt');
 const _ = require('underscore');
+const {
+    verificaToken,
+    verificaTokenAdmin
+} = require('../middlewares/autenticacion');
 const Usuario = require('../models/usuario.models.js');
 var app = express();
 
-app.get('/usuario', function (req, res) {
+app.get('/usuario', verificaToken, function (req, res) {
 
     let desde = req.query.desde || 0;
     desde = Number(desde);
@@ -12,7 +16,9 @@ app.get('/usuario', function (req, res) {
     let limite = req.query.limite || 20;
     limite = Number(limite);
 
-    Usuario.find({estado:true}, 'name email estado')
+    Usuario.find({
+            estado: true
+        }, 'name email estado')
         .skip(desde)
         .limit(limite)
         .exec((err, usuarios) => {
@@ -22,7 +28,9 @@ app.get('/usuario', function (req, res) {
                     err
                 })
             }
-            Usuario.count({estado: true}, (err, conteo) => {
+            Usuario.count({
+                estado: true
+            }, (err, conteo) => {
 
                 res.json({
                     ok: true,
@@ -58,7 +66,7 @@ app.post('/usuario', function (req, res) {
     })
 })
 
-app.put('/usuario/:id', function (req, res) {
+app.put('/usuario/:id', [verificaToken, verificaTokenAdmin], function (req, res) {
     let id = req.params.id
     let body = _.pick(req.body, ['name', 'email', 'img', 'role', 'estado']);
     Usuario.findByIdAndUpdate(id, body, {
@@ -82,11 +90,13 @@ app.put('/usuario/:id', function (req, res) {
 // ========
 // poner estado false de usuario
 // ========
- 
-app.put('/deleteUser/:id', function (req, res) {
+
+app.put('/deleteUser/:id', [verificaToken, verificaTokenAdmin], function (req, res) {
     let id = req.params.id
-    
-    Usuario.findByIdAndUpdate(id, {estado: false}, {
+
+    Usuario.findByIdAndUpdate(id, {
+        estado: false
+    }, {
         new: true,
         runValidators: true
     }, (err, usuarioDB) => {
@@ -105,7 +115,7 @@ app.put('/deleteUser/:id', function (req, res) {
 });
 
 
-app.delete('/usuario/:id', function (req, res) {
+app.delete('/usuario/:id', verificaToken, function (req, res) {
 
     let id = req.body.id;
     Usuario.findByIdAndRemove(id, (err, usuarioBorrado) => {
