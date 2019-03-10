@@ -22,5 +22,8 @@
     "mongoose-validator": "^2.1.0",
     "npm": "^6.4.1",
     "underscore": "^1.9.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.10"
   }
 }
