@@ -1,7 +1,9 @@
 const express = require("express");
 const _ = require("underscore");
 
-const { verificaToken } = require("../middlewares/autenticacion");
+const {
+    verificaToken
+} = require("../middlewares/autenticacion");
 
 let app = express();
 let producto = require("../models/producto");
@@ -10,87 +12,97 @@ let producto = require("../models/producto");
 // obtener productos
 // ==================
 
-app.post("/productos",verificaToken, (req, res) => {
-  const { nombre, precioUni, descripcion, disponible, categoria } = req.body;
-  let usuario = req.usuario._id;
-  let Producto = new producto({
-    nombre,
-    precioUni,
-    descripcion,
-    disponible,
-    categoria,
-    usuario
-  });
-  Producto.save((err, productoDB) => {
-    if (err) {
-      return res.status(400).json({
-        ok: false,
-        err
-      });
-    }
-    res.json({
-      ok: true,
-      message: "Producto creado",
-      productoDB
+app.post("/productos", verificaToken, (req, res) => {
+    const {
+        nombre,
+        precioUni,
+        descripcion,
+        disponible,
+        categoria
+    } = req.body;
+    let usuario = req.usuario._id;
+    let Producto = new producto({
+        nombre,
+        precioUni,
+        descripcion,
+        disponible,
+        categoria,
+        usuario
     });
-  });
+    Producto.save((err, productoDB) => {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            });
+        }
+        res.json({
+            ok: true,
+            message: "Producto creado",
+            productoDB
+        });
+    });
 });
 app.get("/productos", (req, res) => {
-  producto
-    .find({disponible: true})
-    .populate("usuario", "nombre email")
-    .populate("categoria", "descripcion")
-    .exec((err, productosDB) => {
-      if (err) {
-        return res.status(400).json({
-          ok: false,
-          err
+    producto
+        .find({
+            disponible: true
+        })
+        .populate("usuario", "nombre email")
+        .populate("categoria", "descripcion")
+        .exec((err, productosDB) => {
+            if (err) {
+                return res.status(400).json({
+                    ok: false,
+                    err
+                });
+            }
+            return res.json({
+                ok: true,
+                productosDB
+            });
         });
-      }
-      return res.json({
-        ok: true,
-        productosDB
-      });
-    });
 });
 
 //  ============================
 //  Buscar productos por termino
 //  ============================
 
-app.get('/productos/buscar/:termino', verificaToken,  (req, res)=>{
+app.get('/productos/buscar/:termino', verificaToken, (req, res) => {
     let termino = req.params.termino;
     let regex = new RegExp(termino, 'i');
-    producto.find({nombre: regex})
-    .populate('categoria', 'nombre')
-    exec((err, productos)=>{
-        if(err){
+    producto.find({
+            nombre: regex
+        })
+        .populate('categoria', 'nombre')
+    exec((err, productos) => {
+        if (err) {
             return res.status(500).json({
                 ok: false,
                 err
             })
         }
         res.json({
-            ok :true, 
+            ok: true,
             productos
         })
     })
 })
 
 app.get("/productos/:id", (req, res) => {
-  let id = req.params.id;
-  producto.findById(id, (err, productosDB )=>{
-    if (err) {
-        return res.status(400).json({
-            ok: false,
-            err
+    let id = req.params.id;
+    producto.findById(id, (err, productosDB) => {
+        if (err) {
+            return res.status(400).json({
+                ok: false,
+                err
+            })
+        }
+        res.json({
+            ok: true,
+            productosDB
         })
-    }
-    res.json({
-        ok: true,
-        productosDB
     })
-  })
 });
 app.put("/productos/:id", (req, res) => {
     let id = req.params.id;
@@ -98,8 +110,8 @@ app.put("/productos/:id", (req, res) => {
     producto.findByIdAndUpdate(id, body, {
         new: true,
         runValidators: true
-    },  (err, productoDB)=>{
-        if(err){
+    }, (err, productoDB) => {
+        if (err) {
             return res.status(400).json({
                 ok: false,
                 err
@@ -113,25 +125,25 @@ app.put("/productos/:id", (req, res) => {
 });
 
 app.delete("/productos/:id", (req, res) => {
-    let id= req.params.id;
-    producto.findById(id, (err, productoDB)=>{
-        if(err){
+    let id = req.params.id;
+    producto.findById(id, (err, productoDB) => {
+        if (err) {
             return res.status(500).json({
-                ok:false,
+                ok: false,
                 err
             })
         }
-        if(!productoDB){
+        if (!productoDB) {
             return res.status(400).json({
                 ok: false,
-                err:{
+                err: {
                     message: 'no existe el id que buscas'
                 }
             })
         }
         productoDB.disponible = false;
-        productoDB.save((err, productoBorrado)=>{
-            if(err){
+        productoDB.save((err, productoBorrado) => {
+            if (err) {
                 return res.status(500).json({
                     ok: false,
                     err
@@ -139,7 +151,7 @@ app.delete("/productos/:id", (req, res) => {
             }
             res.json({
                 ok: true,
-                producto:  productoBorrado,
+                producto: productoBorrado,
                 message: 'producto borrado'
             })
         })
